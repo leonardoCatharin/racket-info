@@ -129,19 +129,3 @@
 ;; semanal.
 (define (main args)
   (error "Não implementado"))
-
-(define in (open-input-file "../testes/b"))
- (define linha (read-line in))
-
-(define explodeLinha (string-split linha " "))
-(define diaSemana (first explodeLinha))
-(define explodeTempo (string-split (first (rest explodeLinha)) "-"))
-(define tempoInicioArr (string-split (first explodeTempo) "-"))
-(define tempoFimArr (string-split (first (rest explodeTempo)) "-"))
-
-(define tempoInicio (string-split (first tempoInicioArr) ":"))
-(define tempoFim (string-split (first tempoFimArr) ":"))
-
-diaSemana
-tempoInicio
-tempoFim
