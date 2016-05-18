@@ -130,62 +130,85 @@
 (define (main args)
   (error "Não implementado"))
 ;; Atribui para in o arquivo
-(define in (open-input-file "../testes/a"))
-
-;seg 08:30-10:30 14:03-16:00 17:10-18:10
-;; Tenho que fazer split nos ' ',
-;; Depois com o rest tenho que fazer split nos '-',
-;; e colocar na estrutura
-;; (list (list "ter" (list (intervalo (hora 10 20) (hora 12 00))
-;;                         (intervalo (hora 16 10) (hora 17 30))))
-;;       (list "sex" (list (intervalo (hora 08 30) (hora 11 30)))))
-;;
-;; Para cada uma das linhas, faça:
-;; cons [dia] '(intervalos)
 
 
-(define linha (read-line in))
+(define (insere lst x)
+  (cond
+    [(empty? lst)(list x)]
+    [else (cons (first lst)(insere (rest lst) x))]
+  ))
 
+;; Transforma a linha em uma lista que irá conter o dia
 (define (lista-com-dia linha) (string-split linha " "))
 
-(define (separa-intervalo intervalo)(string-split intervalo "-"))
+;; Transforma a lista com dia em uma lista sem o dia
+(define (lista-sem-dia lista) (rest lista))
+
+;; Separa os intervalos em uma lista de strings no formato '("08:30" "10:30")
+(define (intervalo-separado intervalo)(string-split intervalo "-"))
+
+;; Separa a string horário em uma lista de strings no formato '("08" "30")
 (define (separa-horario horario)(string-split horario ":"))
 
-(define (lista-de-intervalos list)
-  (
-   cond
-    [(empty? (rest list)) (first list)]
-    [else (lista-de-intervalos (rest list))]
+;; Transforma a lista '("08" "30") em '(horario "08" "30")
+(define (lista-de-strings-para-horario string)
+  (horario
+   (first (separa-horario string))
+   (first (rest (separa-horario string)))
   )
 )
 
+;; Transforma ("08:30" "10:30") em '((horario "08" "30") (horario "10" "30"))
+(define (lista-de-horarios list)
+  (cond
+    [(empty? list) list]
+    [else (cons (lista-de-strings-para-horario (first list)) (lista-de-horarios (rest list)))]
+   )
+)
 
-(lista-de-intervalos(rest (lista-com-dia linha)))
+;; Transforma '("08:30-10:30" "14:03-16:00" "17:10-18:10") em '(("08:30" "10:30") ("14:03" "16:00") ("17:10" "18:10"))
+(define (lista-de-pre-intervalos list)
+  (cond
+    [(empty? list) list]
+    [else (cons (intervalo-separado (first list)) (lista-de-pre-intervalos (rest list)))]
+  )
+)
+;; Transforma '(("08:30" "10:30") ("14:03" "16:00") ("17:10" "18:10"))
+;; em '( '((horario "08" "30") (horario "10" "30")) '((horario "14" "03") (horario "16" "00")) '((horario "17" "10") (horario "18" "10")))
+(define (lista-de-pre-intervalos-com-horario list) 
+  (
+   cond
+    [(empty? list) list]
+    [else (cons (lista-de-horarios (first list)) (lista-de-pre-intervalos-com-horario (rest list)))]
+  )
+)
 
+;; Transforma '( '((horario "08" "30") (horario "10" "30")) '((horario "14" "03") (horario "16" "00")) '((horario "17" "10") (horario "18" "10")))
+;; em '((intervalo (horario "08" "30") (horario "10" "30")) (intervalo (horario "14" "03") (horario "16" "00")) (intervalo (horario "17" "10") (horario "18" "10")))
+(define (lista-de-intervalos list)
+ (
+  cond
+   [(empty? list) list]
+   [else (cons (intervalo (first (first list)) (first (rest (first list)))) (lista-de-intervalos (rest list)) )]
+ )
+)
+;; Retorna a lista formatada com horários e seu respectivo dia.
+(define (lista-de-intervalos-com-dia lista dia)(cons dia lista))
 
+;; Retorna linha formatada.
+(define (formata-linha linha)
+  (
+    lista-de-intervalos-com-dia(lista-de-intervalos (lista-de-pre-intervalos-com-horario (lista-de-pre-intervalos (lista-sem-dia (lista-com-dia linha))))) (first (lista-com-dia linha))
+  )
+)
+;; Lê o arquivo inteiro e formata todas as entradas.
+(define (lista-com-todos-os-dias-formatados descritor lista)
+  (define linha (read-line descritor))
+  (cond
+    [(eof-object? linha) lista]
+    [else (lista-com-todos-os-dias-formatados descritor (insere lista (formata-linha linha)))]
+  )
+)
 
-(define (explodeHorario linha)(string-split linha "-"))
-
-(define (dia linha) (first (lista-com-dia linha)))
-
-(define (intervalos linha) (rest (lista-com-dia linha)))
-
-(define (horarios linha) (first (intervalos linha)))
-
-(define (horario-inicio linha) (first (explodeHorario (horarios linha))))
-
-(define (horario-fim linha) (first (rest (explodeHorario (horarios linha)))))
-
-
-
-;;(lista-com-dia linha)
-
-;(define diaSemana (first explodeLinha))
-;(define explodeTempo (string-split (first (rest explodeLinha)) "-"))
-;(define tempoInicioArr (string-split (first explodeTempo) "-"))
-;(define tempoFimArr (string-split (first (rest explodeTempo)) "-"))
-
-;(define tempoInicio (string-split (first tempoInicioArr) ":"))
-;(define tempoFim (string-split (first tempoFimArr) ":"))
-
-
+(lista-com-todos-os-dias-formatados (open-input-file "../testes/a") '())
+(lista-com-todos-os-dias-formatados (open-input-file "../testes/b") '())
