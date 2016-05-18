@@ -129,35 +129,57 @@
 ;; semanal.
 (define (main args)
   (error "Não implementado"))
-
+;; Atribui para in o arquivo
 (define in (open-input-file "../testes/a"))
+
+;seg 08:30-10:30 14:03-16:00 17:10-18:10
+;; Tenho que fazer split nos ' ',
+;; Depois com o rest tenho que fazer split nos '-',
+;; e colocar na estrutura
+;; (list (list "ter" (list (intervalo (hora 10 20) (hora 12 00))
+;;                         (intervalo (hora 16 10) (hora 17 30))))
+;;       (list "sex" (list (intervalo (hora 08 30) (hora 11 30)))))
+;;
+;; Para cada uma das linhas, faça:
+;; cons [dia] '(intervalos)
+
+
 (define linha (read-line in))
- 
-(define (explodeLinha linha)
-  (string-split linha " ")
+
+(define (lista-com-dia linha) (string-split linha " "))
+
+(define (separa-intervalo intervalo)(string-split intervalo "-"))
+(define (separa-horario horario)(string-split horario ":"))
+
+(define (lista-de-intervalos list)
+  (
+   cond
+    [(empty? (rest list)) (first list)]
+    [else (lista-de-intervalos (rest list))]
+  )
 )
-(define (explodeHorario linha)
-  (string-split linha "-")
-)
-(define (dia linha)
-  (first (explodeLinha linha))
-)
-(define (intervalos linha)
-  (rest (explodeLinha linha))
-)
-(define (horarios linha)
-  (first (intervalos linha))
-)
-(define (horario-inicio linha)
-  (first (explodeHorario (horarios linha)))
-)
-(define (horario-fim linha)
-  (first (rest (explodeHorario (horarios linha))))
-)
-(define (hora-inicio linha)
-  (first (horario-inicio linha))
-)
-(horario-fim linha)
+
+
+(lista-de-intervalos(rest (lista-com-dia linha)))
+
+
+
+(define (explodeHorario linha)(string-split linha "-"))
+
+(define (dia linha) (first (lista-com-dia linha)))
+
+(define (intervalos linha) (rest (lista-com-dia linha)))
+
+(define (horarios linha) (first (intervalos linha)))
+
+(define (horario-inicio linha) (first (explodeHorario (horarios linha))))
+
+(define (horario-fim linha) (first (rest (explodeHorario (horarios linha)))))
+
+
+
+;;(lista-com-dia linha)
+
 ;(define diaSemana (first explodeLinha))
 ;(define explodeTempo (string-split (first (rest explodeLinha)) "-"))
 ;(define tempoInicioArr (string-split (first explodeTempo) "-"))
@@ -166,4 +188,4 @@
 ;(define tempoInicio (string-split (first tempoInicioArr) ":"))
 ;(define tempoFim (string-split (first tempoFimArr) ":"))
 
-;seg 08:30-10:30 14:03-16:00 17:10-18:10
+
