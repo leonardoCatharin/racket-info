@@ -153,8 +153,8 @@
 ;; Transforma a lista '("08" "30") em '(horario "08" "30")
 (define (lista-de-strings-para-horario string)
   (horario
-   (first (separa-horario string))
-   (first (rest (separa-horario string)))
+   (string->number(first (separa-horario string)))
+   (string->number(first (rest (separa-horario string))))
   )
 )
 
@@ -215,8 +215,8 @@
 (define (recebe-lista-de-arquivos lista)
   (cond
     [(empty? lista) empty]
-    [else (lista-com-todos-os-dias-formatados (open-input-file (first lista)) '())
-          (recebe-lista-de-arquivos (rest lista))]
+    [else (cons (lista-com-todos-os-dias-formatados (open-input-file (first lista)) '())
+          (recebe-lista-de-arquivos (rest lista)))]
   )
 )
 
