@@ -130,18 +130,40 @@
 (define (main args)
   (error "Não implementado"))
 
-(define in (open-input-file "../testes/b"))
- (define linha (read-line in))
+(define in (open-input-file "../testes/a"))
+(define linha (read-line in))
+ 
+(define (explodeLinha linha)
+  (string-split linha " ")
+)
+(define (explodeHorario linha)
+  (string-split linha "-")
+)
+(define (dia linha)
+  (first (explodeLinha linha))
+)
+(define (intervalos linha)
+  (rest (explodeLinha linha))
+)
+(define (horarios linha)
+  (first (intervalos linha))
+)
+(define (horario-inicio linha)
+  (first (explodeHorario (horarios linha)))
+)
+(define (horario-fim linha)
+  (first (rest (explodeHorario (horarios linha))))
+)
+(define (hora-inicio linha)
+  (first (horario-inicio linha))
+)
+(horario-fim linha)
+;(define diaSemana (first explodeLinha))
+;(define explodeTempo (string-split (first (rest explodeLinha)) "-"))
+;(define tempoInicioArr (string-split (first explodeTempo) "-"))
+;(define tempoFimArr (string-split (first (rest explodeTempo)) "-"))
 
-(define explodeLinha (string-split linha " "))
-(define diaSemana (first explodeLinha))
-(define explodeTempo (string-split (first (rest explodeLinha)) "-"))
-(define tempoInicioArr (string-split (first explodeTempo) "-"))
-(define tempoFimArr (string-split (first (rest explodeTempo)) "-"))
+;(define tempoInicio (string-split (first tempoInicioArr) ":"))
+;(define tempoFim (string-split (first tempoFimArr) ":"))
 
-(define tempoInicio (string-split (first tempoInicioArr) ":"))
-(define tempoFim (string-split (first tempoFimArr) ":"))
-
-diaSemana
-tempoInicio
-tempoFim
+;seg 08:30-10:30 14:03-16:00 17:10-18:10
