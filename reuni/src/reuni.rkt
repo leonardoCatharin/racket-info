@@ -192,6 +192,7 @@
    [else (cons (intervalo (first (first list)) (first (rest (first list)))) (lista-de-intervalos (rest list)) )]
  )
 )
+
 ;; Retorna a lista formatada com horários e seu respectivo dia.
 (define (lista-de-intervalos-com-dia lista dia)(cons dia lista))
 
@@ -210,5 +211,13 @@
   )
 )
 
-(lista-com-todos-os-dias-formatados (open-input-file "../testes/a") '())
-(lista-com-todos-os-dias-formatados (open-input-file "../testes/b") '())
+;;recebe lista de arquivos.
+(define (recebe-lista-de-arquivos lista)
+  (cond
+    [(empty? lista) empty]
+    [else (lista-com-todos-os-dias-formatados (open-input-file (first lista)) '())
+          (recebe-lista-de-arquivos (rest lista))]
+  )
+)
+
+(recebe-lista-de-arquivos (list "../testes/a" "../testes/b" "../testes/c"))
