@@ -131,6 +131,8 @@
   (error "Não implementado"))
 ;; Atribui para in o arquivo
 
+;; [duração] '(arquivos) 
+
 
 (define (insere lst x)
   (cond
@@ -143,26 +145,30 @@
 
 ;; Transforma a lista com dia em uma lista sem o dia
 (define (lista-sem-dia lista) (rest lista))
-
+;; ---------------------------------------------------------------------------
 ;; Separa os intervalos em uma lista de strings no formato '("08:30" "10:30")
 (define (intervalo-separado intervalo)(string-split intervalo "-"))
 
 ;; Separa a string horário em uma lista de strings no formato '("08" "30")
 (define (separa-horario horario)(string-split horario ":"))
-
+;; Separa o input do usuário em uma lista de strings no formato '(duração [arquivos])
+(define (separa-input input) (string-split input " "))
+;; ---------------------------------------------------------------------------
 ;; Transforma a lista '("08" "30") em '(horario "08" "30")
-(define (lista-de-strings-para-horario string)
+(define (string-para-horario string)
   (horario
    (string->number(first (separa-horario string)))
    (string->number(first (rest (separa-horario string))))
   )
 )
 
+
+
 ;; Transforma ("08:30" "10:30") em '((horario "08" "30") (horario "10" "30"))
 (define (lista-de-horarios list)
   (cond
     [(empty? list) list]
-    [else (cons (lista-de-strings-para-horario (first list)) (lista-de-horarios (rest list)))]
+    [else (cons (string-para-horario (first list)) (lista-de-horarios (rest list)))]
    )
 )
 
@@ -199,7 +205,12 @@
 ;; Retorna linha formatada.
 (define (formata-linha linha)
   (
-    lista-de-intervalos-com-dia(lista-de-intervalos (lista-de-pre-intervalos-com-horario (lista-de-pre-intervalos (lista-sem-dia (lista-com-dia linha))))) (first (lista-com-dia linha))
+    lista-de-intervalos-com-dia(
+                                lista-de-intervalos (
+                                                     lista-de-pre-intervalos-com-horario (
+                                                                                          lista-de-pre-intervalos (
+                                                                                                                   lista-sem-dia (
+                                                                                                                                  lista-com-dia linha))))) (first (lista-com-dia linha))
   )
 )
 ;; Lê o arquivo inteiro e formata todas as entradas.
@@ -220,4 +231,22 @@
   )
 )
 
-(recebe-lista-de-arquivos (list "../testes/a" "../testes/b" "../testes/c"))
+(define (arquivo-com-caminho arq) (string-append "../testes/" arq))
+
+
+(define (arquivos-com-extensao list)
+  (
+   cond
+    [(empty? list) list]
+    [else (cons (arquivo-com-caminho (first list))  (arquivos-com-extensao (rest list)))]
+  )
+)
+
+(define input (read-line))
+
+;; Informações da Reunião ---------------------------------------------------------
+
+(string-para-horario (first (separa-input input)))
+(recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input input))))
+
+;; --------------------------------------------------------------------------------
