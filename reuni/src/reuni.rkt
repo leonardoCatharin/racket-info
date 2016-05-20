@@ -243,10 +243,14 @@
 )
 
 (define input (read-line))
-
+(define (teste lista)
+  (cond
+    [(lista? (first lista)) first lista]
+)
+  
+  )
 ;; Informações da Reunião ---------------------------------------------------------
-
 (string-para-horario (first (separa-input input)))
 (recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input input))))
-
 ;; --------------------------------------------------------------------------------
+
