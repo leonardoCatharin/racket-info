@@ -132,27 +132,29 @@
 ;; Atribui para in o arquivo
 
 ;; [duração] '(arquivos) 
-
-
 (define (insere lst x)
   (cond
     [(empty? lst)(list x)]
     [else (cons (first lst)(insere (rest lst) x))]
-  ))
+  )
+)
 
 ;; Transforma a linha em uma lista que irá conter o dia
 (define (lista-com-dia linha) (string-split linha " "))
 
 ;; Transforma a lista com dia em uma lista sem o dia
 (define (lista-sem-dia lista) (rest lista))
+
 ;; ---------------------------------------------------------------------------
 ;; Separa os intervalos em uma lista de strings no formato '("08:30" "10:30")
 (define (intervalo-separado intervalo)(string-split intervalo "-"))
 
 ;; Separa a string horário em uma lista de strings no formato '("08" "30")
 (define (separa-horario horario)(string-split horario ":"))
+
 ;; Separa o input do usuário em uma lista de strings no formato '(duração [arquivos])
 (define (separa-input input) (string-split input " "))
+
 ;; ---------------------------------------------------------------------------
 ;; Transforma a lista '("08" "30") em '(horario "08" "30")
 (define (string-para-horario string)
@@ -161,8 +163,6 @@
    (string->number(first (rest (separa-horario string))))
   )
 )
-
-
 
 ;; Transforma ("08:30" "10:30") em '((horario "08" "30") (horario "10" "30"))
 (define (lista-de-horarios list)
@@ -179,6 +179,7 @@
     [else (cons (intervalo-separado (first list)) (lista-de-pre-intervalos (rest list)))]
   )
 )
+
 ;; Transforma '(("08:30" "10:30") ("14:03" "16:00") ("17:10" "18:10"))
 ;; em '( '((horario "08" "30") (horario "10" "30")) '((horario "14" "03") (horario "16" "00")) '((horario "17" "10") (horario "18" "10")))
 (define (lista-de-pre-intervalos-com-horario list) 
@@ -213,6 +214,7 @@
                                                                                                                                   lista-com-dia linha))))) (first (lista-com-dia linha))
   )
 )
+
 ;; Lê o arquivo inteiro e formata todas as entradas.
 (define (lista-com-todos-os-dias-formatados descritor lista)
   (define linha (read-line descritor))
@@ -231,9 +233,10 @@
   )
 )
 
+;;concatena o caminho do arquivo ao nome do arquivo passado no parâmetro arq
 (define (arquivo-com-caminho arq) (string-append "../testes/" arq))
 
-
+;;????????????????
 (define (arquivos-com-extensao list)
   (
    cond
@@ -242,15 +245,33 @@
   )
 )
 
+;;lê a linha de um arquivo
 (define input (read-line))
+;;----------------------------------------------
+
+;;verifica se no intervalo disposto pode ser feito a reunião (se tempo do intervalo é maior que o tempo da reunião retorne o intervalo)
+(define (intervalo-valido intervalo tempo)
+  (cond
+    [(positive? (- (- (horario-h(intervalo-fim intervalo)) (horario-h(intervalo-inicio intervalo))) (string->number(first(separa-horario tempo))) )) intervalo ]
+    [(zero? (- (- (horario-h(intervalo-fim intervalo)) (horario-h(intervalo-inicio intervalo))) (string->number(first(separa-horario tempo))) ))
+     (cond
+       [(positive? (- (- (horario-m(intervalo-fim intervalo)) (horario-m(intervalo-inicio intervalo))) (string->number(first(rest(separa-horario tempo)))) )) intervalo ]
+       [(zero? (- (- (horario-m(intervalo-fim intervalo)) (horario-m(intervalo-inicio intervalo))) (string->number(first(rest(separa-horario tempo)))) )) intervalo ]
+       )
+     ]
+  )
+)
+
 (define (teste lista)
   (cond
-    [(lista? (first lista)) first lista]
+    [(string? (first lista)) (teste(rest lista))]
+    [(intervalo? (first lista)) (intervalo-valido (first lista) "03:47")]
+    [else (teste (first lista))]
+  ) 
 )
-  
-  )
-;; Informações da Reunião ---------------------------------------------------------
-(string-para-horario (first (separa-input input)))
-(recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input input))))
-;; --------------------------------------------------------------------------------
 
+;;----------------------------------------------------------------------------------------------------
+;; Informações da Reunião ---------------------------------------------------------
+;;(string-para-horario (first (separa-input input)))
+(teste (recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input input)))))
+;(recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input input))))
