@@ -262,16 +262,31 @@
   )
 )
 
+(define dias (list "seg" "ter" "qua" "qui" "sex"))
+
 (define (teste lista)
   (cond
     [(string? (first lista)) (teste(rest lista))]
-    [(intervalo? (first lista)) (intervalo-valido (first lista) "03:47")]
+    [(intervalo? (first lista)) (intervalo-valido (first lista) "00:45")]
     [else (teste (first lista))]
   ) 
 )
 
+(define (tem-o-dia? dia list)
+  (cond
+    [(empty? list) #f]
+    [(equal? (first list) dia) #t]
+    [else (tem-o-dia? dia (rest list))]
+    )
+)
+
+(define lista-de-arquivos
+  (recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input input))))
+)
+
+(define segunda-livre (filter (lambda (file)(tem-o-dia? "seg" (first file)))  lista-de-arquivos))
+segunda-livre
 ;;----------------------------------------------------------------------------------------------------
 ;; Informações da Reunião ---------------------------------------------------------
 ;;(string-para-horario (first (separa-input input)))
-(teste (recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input input)))))
 ;(recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input input))))
