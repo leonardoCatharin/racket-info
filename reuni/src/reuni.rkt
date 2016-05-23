@@ -171,8 +171,7 @@
 )
 
 (define (lista-de-pre-intervalos-com-horario list) 
-  (
-   cond
+  (cond
     [(empty? list) list]
     [else (cons (lista-de-horarios (first list)) (lista-de-pre-intervalos-com-horario (rest list)))]
   )
@@ -181,8 +180,7 @@
 ;; Transforma '( '((horario "08" "30") (horario "10" "30")) '((horario "14" "03") (horario "16" "00")) '((horario "17" "10") (horario "18" "10")))
 ;; em '((intervalo (horario "08" "30") (horario "10" "30")) (intervalo (horario "14" "03") (horario "16" "00")) (intervalo (horario "17" "10") (horario "18" "10")))
 (define (lista-de-intervalos list)
- (
-  cond
+ (cond
    [(empty? list) list]
    [else (cons (intervalo (first (first list)) (first (rest (first list)))) (lista-de-intervalos (rest list)) )]
  )
@@ -194,12 +192,7 @@
 ;; Retorna linha formatada.
 (define (formata-linha linha)
   (
-    lista-de-intervalos-com-dia(
-                                lista-de-intervalos (
-                                                     lista-de-pre-intervalos-com-horario (
-                                                                                          lista-de-pre-intervalos (
-                                                                                                                   lista-sem-dia (
-                                                                                                                                  lista-com-dia linha))))) (first (lista-com-dia linha))
+    lista-de-intervalos-com-dia( lista-de-intervalos ( lista-de-pre-intervalos-com-horario ( lista-de-pre-intervalos ( lista-sem-dia ( lista-com-dia linha))))) (first (lista-com-dia linha))
   )
 )
 
@@ -230,10 +223,6 @@
     [else (cons (string-append "../testes/" (first list))  (arquivos-com-extensao (rest list)))]
   )
 )
-
-;;lê a linha de um arquivo
-
-;;----------------------------------------------
 
 ;;verifica se no intervalo disposto pode ser feito a reunião (se tempo do intervalo é maior que o tempo da reunião retorne o intervalo)
 (define (intervalo-valido intervalo tempo)
