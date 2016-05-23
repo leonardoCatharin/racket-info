@@ -139,24 +139,16 @@
   )
 )
 
-;; Transforma a linha em uma lista que irá conter o dia
 (define (lista-com-dia linha) (string-split linha " "))
 
-;; Transforma a lista com dia em uma lista sem o dia
 (define (lista-sem-dia lista) (rest lista))
 
-;; ---------------------------------------------------------------------------
-;; Separa os intervalos em uma lista de strings no formato '("08:30" "10:30")
 (define (intervalo-separado intervalo)(string-split intervalo "-"))
 
-;; Separa a string horário em uma lista de strings no formato '("08" "30")
 (define (separa-horario horario)(string-split horario ":"))
 
-;; Separa o input do usuário em uma lista de strings no formato '(duração [arquivos])
 (define (separa-input input) (string-split input " "))
 
-;; ---------------------------------------------------------------------------
-;; Transforma a lista '("08" "30") em '(horario "08" "30")
 (define (string-para-horario string)
   (horario
    (string->number(first (separa-horario string)))
@@ -164,7 +156,6 @@
   )
 )
 
-;; Transforma ("08:30" "10:30") em '((horario "08" "30") (horario "10" "30"))
 (define (lista-de-horarios list)
   (cond
     [(empty? list) list]
@@ -172,7 +163,6 @@
    )
 )
 
-;; Transforma '("08:30-10:30" "14:03-16:00" "17:10-18:10") em '(("08:30" "10:30") ("14:03" "16:00") ("17:10" "18:10"))
 (define (lista-de-pre-intervalos list)
   (cond
     [(empty? list) list]
@@ -180,8 +170,6 @@
   )
 )
 
-;; Transforma '(("08:30" "10:30") ("14:03" "16:00") ("17:10" "18:10"))
-;; em '( '((horario "08" "30") (horario "10" "30")) '((horario "14" "03") (horario "16" "00")) '((horario "17" "10") (horario "18" "10")))
 (define (lista-de-pre-intervalos-com-horario list) 
   (
    cond
@@ -234,19 +222,17 @@
 )
 
 ;;concatena o caminho do arquivo ao nome do arquivo passado no parâmetro arq
-(define (arquivo-com-caminho arq) (string-append "../testes/" arq))
 
-;;????????????????
 (define (arquivos-com-extensao list)
   (
    cond
     [(empty? list) list]
-    [else (cons (arquivo-com-caminho (first list))  (arquivos-com-extensao (rest list)))]
+    [else (cons (string-append "../testes/" (first list))  (arquivos-com-extensao (rest list)))]
   )
 )
 
 ;;lê a linha de um arquivo
-(define input (read-line))
+
 ;;----------------------------------------------
 
 ;;verifica se no intervalo disposto pode ser feito a reunião (se tempo do intervalo é maior que o tempo da reunião retorne o intervalo)
@@ -262,31 +248,34 @@
   )
 )
 
-(define dias (list "seg" "ter" "qua" "qui" "sex"))
-
-(define (teste lista)
-  (cond
-    [(string? (first lista)) (teste(rest lista))]
-    [(intervalo? (first lista)) (intervalo-valido (first lista) "00:45")]
-    [else (teste (first lista))]
-  ) 
-)
-
 (define (tem-o-dia? dia list)
   (cond
     [(empty? list) #f]
-    [(equal? (first list) dia) #t]
+    [(equal? (first (first list)) dia) #t]
     [else (tem-o-dia? dia (rest list))]
     )
 )
-
-(define lista-de-arquivos
-  (recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input input))))
+(define (retorna-lista-do-dia dia list)
+  (cond
+    [(empty? list) list]
+    [(equal? (first (first list)) dia) (first list)]
+    [else (retorna-lista-do-dia dia (rest list))]
+   )
 )
 
-(define segunda-livre (filter (lambda (file)(tem-o-dia? "seg" (first file)))  lista-de-arquivos))
-segunda-livre
-;;----------------------------------------------------------------------------------------------------
-;; Informações da Reunião ---------------------------------------------------------
-;;(string-para-horario (first (separa-input input)))
-;(recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input input))))
+(define (remove-dia list) (map (λ (list-item)(rest list-item)) list))
+(define (lista-com-pessoas-do-dia dia lista) (filter (λ (pessoa)(tem-o-dia? dia pessoa))  lista))
+(define (remove-dias-com-menos-pessoas numero lista) (filter (λ (dia)(equal? numero (length (dialivre-intervalos dia)))) lista))
+
+
+(struct dialivre (dia intervalos) #:transparent)
+(define lista-de-arquivos (recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input (read-line))))))
+
+(define segunda (dialivre "seg" (remove-dia (map (λ (dia)(retorna-lista-do-dia "seg" dia)) (lista-com-pessoas-do-dia "seg" lista-de-arquivos)))))
+(define terca   (dialivre "ter" (remove-dia (map (λ (dia)(retorna-lista-do-dia "ter" dia)) (lista-com-pessoas-do-dia "ter" lista-de-arquivos)))))
+(define quarta  (dialivre "qua" (remove-dia (map (λ (dia)(retorna-lista-do-dia "qua" dia)) (lista-com-pessoas-do-dia "qua" lista-de-arquivos)))))
+(define quinta  (dialivre "qui" (remove-dia (map (λ (dia)(retorna-lista-do-dia "qui" dia)) (lista-com-pessoas-do-dia "qui" lista-de-arquivos)))))
+(define sexta   (dialivre "sex" (remove-dia (map (λ (dia)(retorna-lista-do-dia "sex" dia)) (lista-com-pessoas-do-dia "sex" lista-de-arquivos)))))
+
+(define todos-os-dias-possiveis (remove-dias-com-menos-pessoas (length lista-de-arquivos) (list segunda terca quarta quinta sexta)))
+todos-os-dias-possiveis
