@@ -254,17 +254,17 @@
 
 (define (remove-dia list) (map (λ (list-item)(rest list-item)) list))
 (define (lista-com-pessoas-do-dia dia lista) (filter (λ (pessoa)(tem-o-dia? dia pessoa))  lista))
-(define (remove-dias-com-menos-pessoas numero lista) (filter (λ (dia)(equal? numero (length (dialivre-intervalos dia)))) lista))
+(define (remove-dias-com-menos-pessoas numero lista) (filter (λ (dia)(equal? numero (length dia))) lista ))
 
 
-(struct dialivre (dia intervalos) #:transparent)
 (define lista-de-arquivos (recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input (read-line))))))
 
-(define segunda (dialivre "seg" (remove-dia (map (λ (dia)(retorna-lista-do-dia "seg" dia)) (lista-com-pessoas-do-dia "seg" lista-de-arquivos)))))
-(define terca   (dialivre "ter" (remove-dia (map (λ (dia)(retorna-lista-do-dia "ter" dia)) (lista-com-pessoas-do-dia "ter" lista-de-arquivos)))))
-(define quarta  (dialivre "qua" (remove-dia (map (λ (dia)(retorna-lista-do-dia "qua" dia)) (lista-com-pessoas-do-dia "qua" lista-de-arquivos)))))
-(define quinta  (dialivre "qui" (remove-dia (map (λ (dia)(retorna-lista-do-dia "qui" dia)) (lista-com-pessoas-do-dia "qui" lista-de-arquivos)))))
-(define sexta   (dialivre "sex" (remove-dia (map (λ (dia)(retorna-lista-do-dia "sex" dia)) (lista-com-pessoas-do-dia "sex" lista-de-arquivos)))))
+(define segunda (map (λ (dia)(retorna-lista-do-dia "seg" dia)) (lista-com-pessoas-do-dia "seg" lista-de-arquivos)))
+(define terca   (map (λ (dia)(retorna-lista-do-dia "ter" dia)) (lista-com-pessoas-do-dia "ter" lista-de-arquivos)))
+(define quarta  (map (λ (dia)(retorna-lista-do-dia "qua" dia)) (lista-com-pessoas-do-dia "qua" lista-de-arquivos)))
+(define quinta  (map (λ (dia)(retorna-lista-do-dia "qui" dia)) (lista-com-pessoas-do-dia "qui" lista-de-arquivos)))
+(define sexta   (map (λ (dia)(retorna-lista-do-dia "sex" dia)) (lista-com-pessoas-do-dia "sex" lista-de-arquivos)))
 
 (define todos-os-dias-possiveis (remove-dias-com-menos-pessoas (length lista-de-arquivos) (list segunda terca quarta quinta sexta)))
+
 todos-os-dias-possiveis
