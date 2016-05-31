@@ -129,3 +129,142 @@
 ;; semanal.
 (define (main args)
   (error "Não implementado"))
+;; Atribui para in o arquivo
+
+;; [duração] '(arquivos) 
+(define (insere lst x)
+  (cond
+    [(empty? lst)(list x)]
+    [else (cons (first lst)(insere (rest lst) x))]
+  )
+)
+
+(define (lista-com-dia linha) (string-split linha " "))
+
+(define (lista-sem-dia lista) (rest lista))
+
+(define (intervalo-separado intervalo)(string-split intervalo "-"))
+
+(define (separa-horario horario)(string-split horario ":"))
+
+(define (separa-input input) (string-split input " "))
+
+(define (string-para-horario string)
+  (horario
+   (string->number(first (separa-horario string)))
+   (string->number(first (rest (separa-horario string))))
+  )
+)
+
+(define (lista-de-horarios list)
+  (cond
+    [(empty? list) list]
+    [else (cons (string-para-horario (first list)) (lista-de-horarios (rest list)))]
+   )
+)
+
+(define (lista-de-pre-intervalos list)
+  (cond
+    [(empty? list) list]
+    [else (cons (intervalo-separado (first list)) (lista-de-pre-intervalos (rest list)))]
+  )
+)
+
+(define (lista-de-pre-intervalos-com-horario list) 
+  (cond
+    [(empty? list) list]
+    [else (cons (lista-de-horarios (first list)) (lista-de-pre-intervalos-com-horario (rest list)))]
+  )
+)
+
+;; Transforma '( '((horario "08" "30") (horario "10" "30")) '((horario "14" "03") (horario "16" "00")) '((horario "17" "10") (horario "18" "10")))
+;; em '((intervalo (horario "08" "30") (horario "10" "30")) (intervalo (horario "14" "03") (horario "16" "00")) (intervalo (horario "17" "10") (horario "18" "10")))
+(define (lista-de-intervalos list)
+ (cond
+   [(empty? list) list]
+   [else (cons (intervalo (first (first list)) (first (rest (first list)))) (lista-de-intervalos (rest list)) )]
+ )
+)
+
+;; Retorna a lista formatada com horários e seu respectivo dia.
+(define (lista-de-intervalos-com-dia lista dia)(cons dia lista))
+
+;; Retorna linha formatada.
+(define (formata-linha linha)
+  (
+    lista-de-intervalos-com-dia( lista-de-intervalos ( lista-de-pre-intervalos-com-horario ( lista-de-pre-intervalos ( lista-sem-dia ( lista-com-dia linha))))) (first (lista-com-dia linha))
+  )
+)
+
+;; Lê o arquivo inteiro e formata todas as entradas.
+(define (lista-com-todos-os-dias-formatados descritor lista)
+  (define linha (read-line descritor))
+  (cond
+    [(eof-object? linha) lista]
+    [else (lista-com-todos-os-dias-formatados descritor (insere lista (formata-linha linha)))]
+  )
+)
+
+;;recebe lista de arquivos.
+(define (recebe-lista-de-arquivos lista)
+  (cond
+    [(empty? lista) empty]
+    [else (cons (lista-com-todos-os-dias-formatados (open-input-file (first lista)) '())
+          (recebe-lista-de-arquivos (rest lista)))]
+  )
+)
+
+;;concatena o caminho do arquivo ao nome do arquivo passado no parâmetro arq
+
+(define (arquivos-com-extensao list)
+  (
+   cond
+    [(empty? list) list]
+    [else (cons (string-append "../testes/" (first list))  (arquivos-com-extensao (rest list)))]
+  )
+)
+
+;;verifica se no intervalo disposto pode ser feito a reunião (se tempo do intervalo é maior que o tempo da reunião retorne o intervalo)
+(define (intervalo-valido intervalo tempo)
+  (cond
+    [(positive? (- (- (horario-h(intervalo-fim intervalo)) (horario-h(intervalo-inicio intervalo))) (string->number(first(separa-horario tempo))) )) intervalo ]
+    [(zero? (- (- (horario-h(intervalo-fim intervalo)) (horario-h(intervalo-inicio intervalo))) (string->number(first(separa-horario tempo))) ))
+     (cond
+       [(positive? (- (- (horario-m(intervalo-fim intervalo)) (horario-m(intervalo-inicio intervalo))) (string->number(first(rest(separa-horario tempo)))) )) intervalo ]
+       [(zero? (- (- (horario-m(intervalo-fim intervalo)) (horario-m(intervalo-inicio intervalo))) (string->number(first(rest(separa-horario tempo)))) )) intervalo ]
+       )
+     ]
+  )
+)
+
+(define (tem-o-dia? dia list)
+  (cond
+    [(empty? list) #f]
+    [(equal? (first (first list)) dia) #t]
+    [else (tem-o-dia? dia (rest list))]
+    )
+)
+(define (retorna-lista-do-dia dia list)
+  (cond
+    [(empty? list) list]
+    [(equal? (first (first list)) dia) (first list)]
+    [else (retorna-lista-do-dia dia (rest list))]
+   )
+)
+
+(define (remove-dia list) (map (λ (list-item)(rest list-item)) list))
+(define (lista-com-pessoas-do-dia dia lista) (filter (λ (pessoa)(tem-o-dia? dia pessoa))  lista))
+(define (remove-dias-com-menos-pessoas numero lista) (filter (λ (dia)(equal? numero (length dia))) lista ))
+
+
+(define lista-de-arquivos (recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input (read-line))))))
+
+(define segunda (map (λ (dia)(retorna-lista-do-dia "seg" dia)) (lista-com-pessoas-do-dia "seg" lista-de-arquivos)))
+(define terca   (map (λ (dia)(retorna-lista-do-dia "ter" dia)) (lista-com-pessoas-do-dia "ter" lista-de-arquivos)))
+(define quarta  (map (λ (dia)(retorna-lista-do-dia "qua" dia)) (lista-com-pessoas-do-dia "qua" lista-de-arquivos)))
+(define quinta  (map (λ (dia)(retorna-lista-do-dia "qui" dia)) (lista-com-pessoas-do-dia "qui" lista-de-arquivos)))
+(define sexta   (map (λ (dia)(retorna-lista-do-dia "sex" dia)) (lista-com-pessoas-do-dia "sex" lista-de-arquivos)))
+
+(define todos-os-dias-possiveis (remove-dias-com-menos-pessoas (length lista-de-arquivos) (list segunda terca quarta quinta sexta)))
+
+todos-os-dias-possiveis
