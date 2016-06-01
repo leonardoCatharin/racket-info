@@ -164,8 +164,20 @@
 
 ;; list Intervalo, list Intervalo -> list Intervalo
 ;; Encontra a interseção dos intervalos de dispo-a e dispo-b.
+;(define (encontrar-dispo-em-comum dispo-a dispo-b)
+;  (for/list ([a dispo-a])
+ ;   (for/list ([b dispo-b])
+  ;    (intervalo-intersecao a b)
+   ; )
+  ;)
+;)
 (define (encontrar-dispo-em-comum dispo-a dispo-b)
-  (error "Não implementado"))
+  (filter (λ (a)
+       (filter (λ (b)
+             (intervalo-intersecao a b)
+       )  dispo-b)
+  )  dispo-a)
+)
 
 ;; Horário, list dispo-semana -> dispo-semana
 ;; Esta função encontra os intervalos disponíveis para cada dia da semana que
@@ -324,17 +336,13 @@
 
 (define lista-de-arquivos (recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input (read-line))))))
 
-(define segunda (map (λ (dia)(retorna-lista-do-dia "seg" dia)) (lista-com-pessoas-do-dia "seg" lista-de-arquivos)))
-(define terca   (map (λ (dia)(retorna-lista-do-dia "ter" dia)) (lista-com-pessoas-do-dia "ter" lista-de-arquivos)))
-(define quarta  (map (λ (dia)(retorna-lista-do-dia "qua" dia)) (lista-com-pessoas-do-dia "qua" lista-de-arquivos)))
-(define quinta  (map (λ (dia)(retorna-lista-do-dia "qui" dia)) (lista-com-pessoas-do-dia "qui" lista-de-arquivos)))
-(define sexta   (map (λ (dia)(retorna-lista-do-dia "sex" dia)) (lista-com-pessoas-do-dia "sex" lista-de-arquivos)))
+;(first(rest (first lista-de-arquivos)))
+;(define segunda (map (λ (dia)(retorna-lista-do-dia "seg" dia)) (lista-com-pessoas-do-dia "seg" lista-de-arquivos)))
+;(define terca   (map (λ (dia)(retorna-lista-do-dia "ter" dia)) (lista-com-pessoas-do-dia "ter" lista-de-arquivos)))
+;(define quarta  (map (λ (dia)(retorna-lista-do-dia "qua" dia)) (lista-com-pessoas-do-dia "qua" lista-de-arquivos)))
+;(define quinta  (map (λ (dia)(retorna-lista-do-dia "qui" dia)) (lista-com-pessoas-do-dia "qui" lista-de-arquivos)))
+;(define sexta   (map (λ (dia)(retorna-lista-do-dia "sex" dia)) (lista-com-pessoas-do-dia "sex" lista-de-arquivos)))
 
-(define todos-os-dias-possiveis (remove-dias-com-menos-pessoas (length lista-de-arquivos) (list segunda terca quarta quinta sexta)))
+;(define todos-os-dias-possiveis (remove-dias-com-menos-pessoas (length lista-de-arquivos) (list segunda terca quarta quinta sexta)))
 
 ;todos-os-dias-possiveis
-(define a (intervalo (horario (string->number "02") (string->number "00")) (horario (string->number "03") (string->number "00"))))
-(define b (intervalo (horario (string->number "01") (string->number "00")) (horario (string->number "02") (string->number "09"))))
-(define intervalo-final (intervalo-intersecao a b))
-
-(intervalo-valido intervalo-final "00:10")
