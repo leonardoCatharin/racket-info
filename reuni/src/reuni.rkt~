@@ -78,15 +78,106 @@
 (define (intervalo-vazio? inter)
   (equal? inter intervalo-vazio))
 
+;;é usada na função abaixo
+;;constroi o horário inicial dado um intervalo x
+(define (horario-inicial-construido x)
+  (horario (horario-h(intervalo-inicio x)) (horario-m(intervalo-inicio x)))
+)
+
+;;Encontra o maior horário inicial entre os intervalos a e b
+(define (max-intervalo-inicial a b)
+  (cond
+    [(> (horario-h(intervalo-inicio a)) (horario-h(intervalo-inicio b)))
+       (horario-inicial-construido a)
+    ]
+    [(equal? (horario-h(intervalo-inicio a)) (horario-h(intervalo-inicio b)))
+       (cond
+         [(>= (horario-m(intervalo-inicio a)) (horario-m(intervalo-inicio b)))
+          (horario-inicial-construido a)
+         ]
+         [else (horario-inicial-construido b)]
+       )
+    ]
+    [else (horario-inicial-construido b)]
+   )
+)
+
+;;é usada na função abaixo
+;;constroi o horário final dado um intervalo x
+(define (horario-final-construido x)
+  (horario (horario-h(intervalo-fim x)) (horario-m(intervalo-fim x)))
+)
+
+;;Encontra o menor horário final entre os intervalos a e b
+(define (min-intervalo-final a b)
+  (cond
+    [(< (horario-h(intervalo-fim a)) (horario-h(intervalo-fim b)))
+       (horario-final-construido a)
+    ]
+    [(equal? (horario-h(intervalo-fim a)) (horario-h(intervalo-fim b)))
+       (cond
+         [(<= (horario-m(intervalo-fim a)) (horario-m(intervalo-fim b)))
+          (horario-final-construido a)
+         ]
+         [else (horario-final-construido b)]
+       )
+    ]
+    [else (horario-final-construido b)]
+   )
+)
+
+;;Verifica se o horário final é maoir que o inicial
+(define (horario-final-e-maior-inicial? inicial final)
+  (cond
+    [(> (horario-h final) (horario-h inicial)) #t]
+    [(equal? (horario-h final) (horario-h inicial))
+     (cond
+       [(> (horario-m final) (horario-m inicial)) #t]
+     )
+    ]
+    [else #f]
+  )
+)
+
 ;; Intervalo, Intervalo -> Intervalo
 ;; Calcula a interseção entre os intervalos a e b
 (define (intervalo-intersecao a b)
-  (error "Não implementado"))
+  (cond
+    [(horario-final-e-maior-inicial? (max-intervalo-inicial a b) (min-intervalo-final a b))
+     (intervalo (max-intervalo-inicial a b) (min-intervalo-final a b))
+    ]
+  )
+)
+
+;;verifica se no intervalo disposto pode ser feito a reunião (se tempo do intervalo é maior que o tempo da reunião retorne o intervalo)
+(define (intervalo-valido intervalo tempo)
+  (cond
+    [(positive? (- (- (horario-h(intervalo-fim intervalo)) (horario-h(intervalo-inicio intervalo))) (string->number(first(separa-horario tempo))) )) intervalo ]
+    [(zero? (- (- (horario-h(intervalo-fim intervalo)) (horario-h(intervalo-inicio intervalo))) (string->number(first(separa-horario tempo))) ))
+     (cond
+       [(positive? (- (- (horario-m(intervalo-fim intervalo)) (horario-m(intervalo-inicio intervalo))) (string->number(first(rest(separa-horario tempo)))) )) intervalo ]
+       [(zero? (- (- (horario-m(intervalo-fim intervalo)) (horario-m(intervalo-inicio intervalo))) (string->number(first(rest(separa-horario tempo)))) )) intervalo ]
+       )
+     ]
+  )
+)
 
 ;; list Intervalo, list Intervalo -> list Intervalo
 ;; Encontra a interseção dos intervalos de dispo-a e dispo-b.
+;(define (encontrar-dispo-em-comum dispo-a dispo-b)
+;  (for/list ([a dispo-a])
+ ;   (for/list ([b dispo-b])
+  ;    (intervalo-intersecao a b)
+   ; )
+  ;)
+;)
 (define (encontrar-dispo-em-comum dispo-a dispo-b)
-  (error "Não implementado"))
+  (filter (λ (a)
+       (filter (λ (b)
+             (intervalo-intersecao a b)
+       )  dispo-b)
+  )  dispo-a)
+)
 
 ;; Horário, list dispo-semana -> dispo-semana
 ;; Esta função encontra os intervalos disponíveis para cada dia da semana que
@@ -217,23 +308,9 @@
 ;;concatena o caminho do arquivo ao nome do arquivo passado no parâmetro arq
 
 (define (arquivos-com-extensao list)
-  (
-   cond
+  (cond
     [(empty? list) list]
     [else (cons (string-append "../testes/" (first list))  (arquivos-com-extensao (rest list)))]
-  )
-)
-
-;;verifica se no intervalo disposto pode ser feito a reunião (se tempo do intervalo é maior que o tempo da reunião retorne o intervalo)
-(define (intervalo-valido intervalo tempo)
-  (cond
-    [(positive? (- (- (horario-h(intervalo-fim intervalo)) (horario-h(intervalo-inicio intervalo))) (string->number(first(separa-horario tempo))) )) intervalo ]
-    [(zero? (- (- (horario-h(intervalo-fim intervalo)) (horario-h(intervalo-inicio intervalo))) (string->number(first(separa-horario tempo))) ))
-     (cond
-       [(positive? (- (- (horario-m(intervalo-fim intervalo)) (horario-m(intervalo-inicio intervalo))) (string->number(first(rest(separa-horario tempo)))) )) intervalo ]
-       [(zero? (- (- (horario-m(intervalo-fim intervalo)) (horario-m(intervalo-inicio intervalo))) (string->number(first(rest(separa-horario tempo)))) )) intervalo ]
-       )
-     ]
   )
 )
 
@@ -259,12 +336,13 @@
 
 (define lista-de-arquivos (recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input (read-line))))))
 
-(define segunda (map (λ (dia)(retorna-lista-do-dia "seg" dia)) (lista-com-pessoas-do-dia "seg" lista-de-arquivos)))
-(define terca   (map (λ (dia)(retorna-lista-do-dia "ter" dia)) (lista-com-pessoas-do-dia "ter" lista-de-arquivos)))
-(define quarta  (map (λ (dia)(retorna-lista-do-dia "qua" dia)) (lista-com-pessoas-do-dia "qua" lista-de-arquivos)))
-(define quinta  (map (λ (dia)(retorna-lista-do-dia "qui" dia)) (lista-com-pessoas-do-dia "qui" lista-de-arquivos)))
-(define sexta   (map (λ (dia)(retorna-lista-do-dia "sex" dia)) (lista-com-pessoas-do-dia "sex" lista-de-arquivos)))
+;(first(rest (first lista-de-arquivos)))
+;(define segunda (map (λ (dia)(retorna-lista-do-dia "seg" dia)) (lista-com-pessoas-do-dia "seg" lista-de-arquivos)))
+;(define terca   (map (λ (dia)(retorna-lista-do-dia "ter" dia)) (lista-com-pessoas-do-dia "ter" lista-de-arquivos)))
+;(define quarta  (map (λ (dia)(retorna-lista-do-dia "qua" dia)) (lista-com-pessoas-do-dia "qua" lista-de-arquivos)))
+;(define quinta  (map (λ (dia)(retorna-lista-do-dia "qui" dia)) (lista-com-pessoas-do-dia "qui" lista-de-arquivos)))
+;(define sexta   (map (λ (dia)(retorna-lista-do-dia "sex" dia)) (lista-com-pessoas-do-dia "sex" lista-de-arquivos)))
 
-(define todos-os-dias-possiveis (remove-dias-com-menos-pessoas (length lista-de-arquivos) (list segunda terca quarta quinta sexta)))
+;(define todos-os-dias-possiveis (remove-dias-com-menos-pessoas (length lista-de-arquivos) (list segunda terca quarta quinta sexta)))
 
-todos-os-dias-possiveis
+;todos-os-dias-possiveis
