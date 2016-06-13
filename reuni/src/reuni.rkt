@@ -133,6 +133,7 @@
     [(equal? (horario-h final) (horario-h inicial))
      (cond
        [(> (horario-m final) (horario-m inicial)) #t]
+       [else #f]
      )
     ]
     [else #f]
@@ -149,7 +150,7 @@
   )
 )
 
-;;verifica se no intervalo disposto pode ser feito a reunião (se tempo do intervalo é maior que o tempo da reunião retorne o intervalo)
+;;verifica se no intervalo disposto pode ser feito a reunião (se o tempo do intervalo é maior que o tempo da reunião retorne o intervalo)
 (define (intervalo-valido intervalo tempo)
   (cond
     [(positive? (- (- (horario-h(intervalo-fim intervalo)) (horario-h(intervalo-inicio intervalo))) (string->number(first(separa-horario tempo))) )) intervalo ]
@@ -161,16 +162,29 @@
      ]
   )
 )
-
+;;'aplaina' as listas para a penas uma lista de intervalos 
+(define (aplaina lst)
+  (cond
+    [(empty? lst) empty]
+    [(list? (first lst))
+     (append (aplaina (first lst))
+             (aplaina (rest lst)))]
+    [else
+     (cons (first lst)
+           (aplaina (rest lst)))]))
 ;; list Intervalo, list Intervalo -> list Intervalo
 ;; Encontra a interseção dos intervalos de dispo-a e dispo-b.
 (define (encontrar-dispo-em-comum dispo-a dispo-b)
-  (for/list ([a dispo-a])
-   (for/list ([b dispo-b])
-    (intervalo-intersecao a b)
-   )
+  (filter intervalo?
+          (aplaina
+           (for/list ([a dispo-a])
+             (for/list ([b dispo-b])
+               (intervalo-intersecao a b)
+               )
+             )
+           )
+          )
   )
-)
 
 (define dispo-b (list (intervalo (horario 08 32) (horario 09 45))
                       (intervalo (horario 10 20) (horario 11 15))

@@ -164,20 +164,27 @@
 
 ;; list Intervalo, list Intervalo -> list Intervalo
 ;; Encontra a interseção dos intervalos de dispo-a e dispo-b.
-;(define (encontrar-dispo-em-comum dispo-a dispo-b)
-;  (for/list ([a dispo-a])
- ;   (for/list ([b dispo-b])
-  ;    (intervalo-intersecao a b)
-   ; )
-  ;)
-;)
 (define (encontrar-dispo-em-comum dispo-a dispo-b)
-  (filter (λ (a)
-       (filter (λ (b)
-             (intervalo-intersecao a b)
-       )  dispo-b)
-  )  dispo-a)
+  (for/list ([a dispo-a])
+   (for/list ([b dispo-b])
+    (intervalo-intersecao a b)
+   )
+  )
 )
+
+(define dispo-b (list (intervalo (horario 08 32) (horario 09 45))
+                      (intervalo (horario 10 20) (horario 11 15))
+                      (intervalo (horario 13 30) (horario 18 00))))
+
+(define dispo-c (list (intervalo (horario 09 00) (horario 14 21))
+                      (intervalo (horario 15 29) (horario 16 12))))
+
+(define dispo-d (list (intervalo (horario 09 00) (horario 09 45))
+                      (intervalo (horario 10 20) (horario 11 15))
+                      (intervalo (horario 13 30) (horario 14 21))
+                      (intervalo (horario 15 29) (horario 16 12))))
+
+(encontrar-dispo-em-comum dispo-b dispo-c)
 
 ;; Horário, list dispo-semana -> dispo-semana
 ;; Esta função encontra os intervalos disponíveis para cada dia da semana que
