@@ -198,7 +198,7 @@
                       (intervalo (horario 13 30) (horario 14 21))
                       (intervalo (horario 15 29) (horario 16 12))))
 
-(encontrar-dispo-em-comum dispo-b dispo-c)
+;;(encontrar-dispo-em-comum dispo-b dispo-c)
 
 ;; Horário, list dispo-semana -> dispo-semana
 ;; Esta função encontra os intervalos disponíveis para cada dia da semana que
@@ -220,8 +220,72 @@
 ;; Observe que esta função recebe como parâmetro uma lista de disponibilidades
 ;; semanais, o exemplo acima refere-se a apenas uma disponibilidade semanal.
 ;; Veja os testes de unidade para exemplos de entrada e saída desta função
+
+
+
+(define dispo-semana-a
+  (list (list "seg" (list (intervalo (horario 08 30) (horario 10 30))
+                          (intervalo (horario 14 03) (horario 16 00))
+                          (intervalo (horario 17 10) (horario 18 10))))
+        (list "ter" (list (intervalo (horario 13 30) (horario 15 45))))
+        (list "qua" (list (intervalo (horario 11 27) (horario 13 00))
+                          (intervalo (horario 15 00) (horario 19 00))))
+        (list "sex" (list (intervalo (horario 07 30) (horario 11 30))
+                          (intervalo (horario 13 30) (horario 14 00))
+                          (intervalo (horario 15 02) (horario 16 00))
+                          (intervalo (horario 17 20) (horario 18 30))))))
+(define dispo-semana-b
+  (list (list "seg" (list (intervalo (horario 14 35) (horario 17 58))))
+        (list "ter" (list (intervalo (horario 08 40) (horario 10 30))
+                          (intervalo (horario 13 31) (horario 15 13))))
+        (list "qui" (list (intervalo (horario 08 30) (horario 15 30))))
+        (list "sex" (list (intervalo (horario 14 07) (horario 15 00))
+                          (intervalo (horario 16 00) (horario 17 30))
+                          (intervalo (horario 19 00) (horario 22 00))))))
+(define dispo-semana-c
+  (list (list "seg" (list (intervalo (horario 10 00) (horario 12 00))
+                          (intervalo (horario 15 30) (horario 17 30))))
+        (list "sex" (list (intervalo (horario 10 00) (horario 12 00))
+                          (intervalo (horario 15 30) (horario 17 30))))))
+
+(define (tem-o-dia? dia list)
+  (cond
+    [(empty? list) #f]
+    [(equal? (first (first list)) dia) #t]
+    [else (tem-o-dia? dia (rest list))]
+    )
+)
+(define (retorna-lista-do-dia dia list)
+  (cond
+    [(empty? list) list]
+    [(equal? (first (first list)) dia) (first list)]
+    [else (retorna-lista-do-dia dia (rest list))]
+   )
+)
+
+(define (remove-dia list) (map (λ (list-item)(rest list-item)) list))
+(define (pessoas-com-o-dia dia lista) (filter (λ (pessoa)(tem-o-dia? dia pessoa))  lista))
+(define (normalize list) (rest (rest list)))
+
 (define (encontrar-dispo-semana-em-comum tempo dispos)
-  (error "Não implementado"))
+  (let* 
+      (
+        [dias (map (λ (dia)(map (λ (lista-dispo-item)(retorna-lista-do-dia dia lista-dispo-item)) (pessoas-com-o-dia dia dispos)))'("seg" "ter" "qua" "qui" "sex"))]
+        [dias-possiveis (filter (λ (dia)(equal? (length dispos) (length dia) )) dias )]
+      )
+      (map
+       (λ (dia-dispo)
+         (map (λ (value) value) dia-dispo)
+       ) dias-possiveis)
+   )
+)
+
+(encontrar-dispo-semana-em-comum "00:20" (list dispo-semana-a dispo-semana-b dispo-semana-c))
+;;(foldr (λ (dispo result)(
+ ;;                                 cond
+ ;;                                 [(equal? result 0) dispo]
+ ;;                                 [else (encontrar-dispo-em-comum (rest dispo) (rest result))]
+ ;;                                 )) 0 dia-dispo)
 
 ;; list string -> void
 ;; Esta é a função principal. Esta função é chamada a partir do arquivo
@@ -335,30 +399,14 @@
   )
 )
 
-(define (tem-o-dia? dia list)
-  (cond
-    [(empty? list) #f]
-    [(equal? (first (first list)) dia) #t]
-    [else (tem-o-dia? dia (rest list))]
-    )
-)
-(define (retorna-lista-do-dia dia list)
-  (cond
-    [(empty? list) list]
-    [(equal? (first (first list)) dia) (first list)]
-    [else (retorna-lista-do-dia dia (rest list))]
-   )
-)
 
-(define (remove-dia list) (map (λ (list-item)(rest list-item)) list))
-(define (lista-com-pessoas-do-dia dia lista) (filter (λ (pessoa)(tem-o-dia? dia pessoa))  lista))
 (define (remove-dias-com-menos-pessoas numero lista) (filter (λ (dia)(equal? numero (length dia))) lista ))
 
 
 (define lista-de-arquivos (recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input (read-line))))))
 
 ;(first(rest (first lista-de-arquivos)))
-;(define segunda (map (λ (dia)(retorna-lista-do-dia "seg" dia)) (lista-com-pessoas-do-dia "seg" lista-de-arquivos)))
+(define segunda (map (λ (dia)(retorna-lista-do-dia "seg" dia)) (pessoas-com-o-dia "seg" lista-de-arquivos)))
 ;(define terca   (map (λ (dia)(retorna-lista-do-dia "ter" dia)) (lista-com-pessoas-do-dia "ter" lista-de-arquivos)))
 ;(define quarta  (map (λ (dia)(retorna-lista-do-dia "qua" dia)) (lista-com-pessoas-do-dia "qua" lista-de-arquivos)))
 ;(define quinta  (map (λ (dia)(retorna-lista-do-dia "qui" dia)) (lista-com-pessoas-do-dia "qui" lista-de-arquivos)))
