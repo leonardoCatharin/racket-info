@@ -143,7 +143,7 @@
 (define (separa-horario horario)(string-split horario ":"))
 
 ;;verifica se no intervalo disposto pode ser feito a reunião (se o tempo do intervalo é maior que o tempo da reunião retorne o intervalo)
-(define (intervalo-valido intervalo tempo)
+(define (intervalo-valido? intervalo tempo)
   (let (
          [hora-fim-intervalo (horario-h (intervalo-fim intervalo))]
          [minuto-fim-intervalo (horario-m(intervalo-fim intervalo))]
@@ -175,6 +175,7 @@
     [else
      (cons (first lst)
            (aplaina (rest lst)))]))
+
 ;; list Intervalo, list Intervalo -> list Intervalo
 ;; Encontra a interseção dos intervalos de dispo-a e dispo-b.
 (define (encontrar-dispo-em-comum dispo-a dispo-b)
@@ -190,7 +191,6 @@
   )
 
 ;;(encontrar-dispo-em-comum dispo-b dispo-c)
-
 ;; Horário, list dispo-semana -> dispo-semana
 ;; Esta função encontra os intervalos disponíveis para cada dia da semana que
 ;; sejam maiores que tempo e que sejam comuns a todas as disponibilidades
@@ -267,6 +267,7 @@
    )
   )
 
+
 (define (encontrar-dispo-semana-em-comum tempo dispos)
   (let* 
       (
@@ -274,19 +275,21 @@
         [dias-possiveis (filter (λ (dia)(equal? (length dispos) (length dia) )) dias )]
         [dias-com-dispos (map (λ (dia-dispo)(pega-interseccoes (rest dia-dispo) (first dia-dispo) )) dias-possiveis)]
       )
-       
     (filter
-       (λ (dia)
-         (not (empty? (filter
-           (λ (intervalo)
-                    (intervalo-valido intervalo tempo))
-           (first (rest dia)))))
-         ) dias-com-dispos)
+     (λ (dia-resultado) (not (empty? (first (rest dia-resultado)))))
+     (map 
+      (λ (dia)
+        (cons (first dia) (list (filter (λ (intervalo)(intervalo-valido? intervalo tempo))(first (rest dia)))))
+        ) dias-com-dispos) 
+     )
     
    )
 )
 
-(equal? (encontrar-dispo-semana-em-comum (horario 00 49) (list dispo-semana-a )) dispo-semana-a)
+(encontrar-dispo-semana-em-comum (horario 01 00)
+                                           (list dispo-semana-a dispo-semana-b))
+
+;(equal? (encontrar-dispo-semana-em-comum (horario 00 49) (list dispo-semana-a )) dispo-semana-a)
 
 ;; list string -> void
 ;; Esta é a função principal. Esta função é chamada a partir do arquivo
