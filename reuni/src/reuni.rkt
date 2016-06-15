@@ -283,7 +283,7 @@
 (define (encontrar-dispo-semana-em-comum tempo dispos)
   (let* 
       (
-        [dias (map (λ (dia)(map (λ (lista-dispo-item)(retorna-lista-do-dia dia lista-dispo-item)) (pessoas-com-o-dia dia dispos)))'("seg" "ter" "qua" "qui" "sex"))]
+        [dias (map (λ (dia)(map (λ (lista-dispo-item)(retorna-lista-do-dia dia lista-dispo-item)) (pessoas-com-o-dia dia dispos)))'("dom" "seg" "ter" "qua" "qui" "sex" "sab"))]
         [dias-possiveis (filter (λ (dia)(equal? (length dispos) (length dia) )) dias )]
         [dias-com-dispos (map (λ (dia-dispo)(pega-interseccoes (rest dia-dispo) (first dia-dispo))) dias-possiveis)]
       )
