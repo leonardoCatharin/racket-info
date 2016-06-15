@@ -263,24 +263,36 @@
    )
 )
 
-(define (remove-dia list) (map (λ (list-item)(rest list-item)) list))
-(define (pessoas-com-o-dia dia lista) (filter (λ (pessoa)(tem-o-dia? dia pessoa))  lista))
-(define (normalize list) (rest (rest list)))
+(define (remove-dia list)
+  (map (λ (list-item)(rest list-item)) list)
+)
+(define (pessoas-com-o-dia dia lista)
+  (filter (λ (pessoa)(tem-o-dia? dia pessoa))  lista)
+)
+(define (normalize list)
+  (rest (rest list))
+)
+
+(define (pega-interseccoes lst acc)
+  (cond
+    [(empty? lst) acc]
+    [else (pega-interseccoes (rest lst) (cons (first (first lst)) (list (encontrar-dispo-em-comum  (first (rest (first lst))) (first (rest acc))))))]
+   )
+  )
 
 (define (encontrar-dispo-semana-em-comum tempo dispos)
   (let* 
       (
         [dias (map (λ (dia)(map (λ (lista-dispo-item)(retorna-lista-do-dia dia lista-dispo-item)) (pessoas-com-o-dia dia dispos)))'("seg" "ter" "qua" "qui" "sex"))]
         [dias-possiveis (filter (λ (dia)(equal? (length dispos) (length dia) )) dias )]
+        [dias-com-dispos (map (λ (dia-dispo)(pega-interseccoes (rest dia-dispo) (first dia-dispo))) dias-possiveis)]
       )
-      (map
-       (λ (dia-dispo)
-         (map (λ (value) value) dia-dispo)
-       ) dias-possiveis)
+      dias-com-dispos
    )
 )
 
 (encontrar-dispo-semana-em-comum "00:20" (list dispo-semana-a dispo-semana-b dispo-semana-c))
+
 ;;(foldr (λ (dispo result)(
  ;;                                 cond
  ;;                                 [(equal? result 0) dispo]
