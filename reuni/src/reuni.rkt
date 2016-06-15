@@ -1,55 +1,5 @@
 #lang racket
 
-;; Este programa encontra horários disponíveis que sejam comuns entre vários
-;; horários especificados e que tenham um tamanho mínimo especificado.
-;;
-;; ** Conceitos **
-;;  Horário
-;;    Um momento no tempo, definido em termos da hora e minutos
-;;  Intervalo (abreviado inter)
-;;    Um intervalo no tempo, tem um horário de início e um horário de fim
-;;  Disponibilidade do dia (abreviado dispo)
-;;    Uma lista de intervalos que estão disponíveis em um determinado dia
-;;  Disponibilidade semanal (abreviado dispo-semana)
-;;    Uma lista com as disponibilidades de cada dia
-;;  Lista de associações
-;;    Uma lista de pares. Um par é uma lista com dois elementos. O primeiro
-;;    elemento do par é chamado de chave e o segundo elemento é chamado de
-;;    valor. Uma lista de associações é uma maneira simples de implementar uma
-;;    tabela associativa (dicionário).  Ex: o dicionário
-;;    1 -> 4, 20 -> 12, 6 -> 70, pode ser representado pela lista associativa
-;;    (list (list 1 4) (list 20 12) (list 6 70)).
-;;    A função assoc é utilizada para consultar uma lista associativa.
-;;
-;; ** Formatação de entrada e saída **
-;; Toda operação de entrada e saída deve ser feita respeitando essas
-;; formatações. A sua implementação não precisa validar as entradas. Para os
-;; testes automatizados as entradas sempre serão válidas.
-;;
-;;  Horário (HH:MM) (sempre 5 dígitos)
-;;  Exemplos
-;;     08:30 =  8 horas e 30 minutos
-;;     12:07 = 12 horas e  7 minutos
-;;
-;;  Intervalo (HH:MM-HH:MM) (sempre 11 dígitos)
-;;  Exemplos
-;;     08:30-12:07 = o intervalo tem início às 8 horas e 30 minutos e tem
-;;                   o fim às 12 horas e 7 minutos
-;;
-;;  Dias da semana
-;;    Representados por strings de tamanho 3: dom seg ter qua qui sex sab
-;;
-;;  Disponibilidade semanal
-;;    Uma sequência de linhas. Cada linha contém o dia e a lista de
-;;    intervalos disponíveis naquele dia
-;;  Exemplo
-;;    ter 10:20-12:00 16:10-17:30
-;;    sex 08:30-11:30
-;;  Observe que nem todos os dias devem estar especificados. Os dias
-;;  que não têm disponibilidades não devem ser especificados.
-
-
-;; exporta as funções que podem ser utilizadas em outros arquivos
 (provide horario
          intervalo
          intervalo-vazio
@@ -71,25 +21,34 @@
 ;;é usada na função abaixo
 ;;constroi o horário inicial dado um intervalo x
 (define (horario-inicial-construido x)
-  (horario (horario-h(intervalo-inicio x)) (horario-m(intervalo-inicio x)))
+  (let
+    (
+     [hora (horario-h(intervalo-inicio x))]
+     [minuto (horario-m(intervalo-inicio x))]
+    )
+    (horario hora minuto)
+  )
 )
 
 ;;Encontra o maior horário inicial entre os intervalos a e b
 (define (max-intervalo-inicial a b)
-  (cond
-    [(> (horario-h(intervalo-inicio a)) (horario-h(intervalo-inicio b)))
-       (horario-inicial-construido a)
-    ]
-    [(equal? (horario-h(intervalo-inicio a)) (horario-h(intervalo-inicio b)))
+  (let (
+        [hora-intervalo-inicio-a (horario-h(intervalo-inicio a))]
+        [hora-intervalo-inicio-b (horario-h(intervalo-inicio b))]
+        [minuto-intervalo-inicio-a (horario-m(intervalo-inicio a))]
+        [minuto-intervalo-inicio-b (horario-m(intervalo-inicio b))]
+        )
+    (cond
+      [(> hora-intervalo-inicio-a hora-intervalo-inicio-b) (horario-inicial-construido a)]
+      [(equal? hora-intervalo-inicio-a hora-intervalo-inicio-b)
        (cond
-         [(>= (horario-m(intervalo-inicio a)) (horario-m(intervalo-inicio b)))
-          (horario-inicial-construido a)
-         ]
+         [(>= minuto-intervalo-inicio-a minuto-intervalo-inicio-b) (horario-inicial-construido a)]
          [else (horario-inicial-construido b)]
-       )
-    ]
-    [else (horario-inicial-construido b)]
-   )
+         )
+       ]
+      [else (horario-inicial-construido b)]
+      )
+    ) 
 )
 
 ;;é usada na função abaixo
