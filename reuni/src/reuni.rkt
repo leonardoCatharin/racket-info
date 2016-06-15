@@ -150,16 +150,20 @@
   )
 )
 
+(define (separa-horario horario)(string-split horario ":"))
+
 ;;verifica se no intervalo disposto pode ser feito a reunião (se o tempo do intervalo é maior que o tempo da reunião retorne o intervalo)
 (define (intervalo-valido intervalo tempo)
   (cond
-    [(positive? (- (- (horario-h(intervalo-fim intervalo)) (horario-h(intervalo-inicio intervalo))) (string->number(first(separa-horario tempo))) )) intervalo ]
+    [(positive? (- (- (horario-h(intervalo-fim intervalo)) (horario-h(intervalo-inicio intervalo))) (string->number(first(separa-horario tempo))) )) #t ]
     [(zero? (- (- (horario-h(intervalo-fim intervalo)) (horario-h(intervalo-inicio intervalo))) (string->number(first(separa-horario tempo))) ))
      (cond
-       [(positive? (- (- (horario-m(intervalo-fim intervalo)) (horario-m(intervalo-inicio intervalo))) (string->number(first(rest(separa-horario tempo)))) )) intervalo ]
-       [(zero? (- (- (horario-m(intervalo-fim intervalo)) (horario-m(intervalo-inicio intervalo))) (string->number(first(rest(separa-horario tempo)))) )) intervalo ]
+       [(positive? (- (- (horario-m(intervalo-fim intervalo)) (horario-m(intervalo-inicio intervalo))) (string->number(first(rest(separa-horario tempo)))) )) #t ]
+       [(zero? (- (- (horario-m(intervalo-fim intervalo)) (horario-m(intervalo-inicio intervalo))) (string->number(first(rest(separa-horario tempo)))) )) #t ]
+       [else #f]
        )
      ]
+    [else #f]
   )
 )
 ;;'aplaina' as listas para a penas uma lista de intervalos 
@@ -273,10 +277,10 @@
   (rest (rest list))
 )
 
-(define (pega-interseccoes lst acc)
+(define (pega-interseccoes lst acc tempo)
   (cond
     [(empty? lst) acc]
-    [else (pega-interseccoes (rest lst) (cons (first (first lst)) (list (encontrar-dispo-em-comum  (first (rest (first lst))) (first (rest acc))))))]
+    [else (pega-interseccoes (rest lst) (cons (first (first lst)) (list (encontrar-dispo-em-comum  (first (rest (first lst))) (first (rest acc))) )) tempo)]
    )
   )
 
@@ -285,13 +289,13 @@
       (
         [dias (map (λ (dia)(map (λ (lista-dispo-item)(retorna-lista-do-dia dia lista-dispo-item)) (pessoas-com-o-dia dia dispos)))'("dom" "seg" "ter" "qua" "qui" "sex" "sab"))]
         [dias-possiveis (filter (λ (dia)(equal? (length dispos) (length dia) )) dias )]
-        [dias-com-dispos (map (λ (dia-dispo)(pega-interseccoes (rest dia-dispo) (first dia-dispo))) dias-possiveis)]
+        [dias-com-dispos (map (λ (dia-dispo)(pega-interseccoes (rest dia-dispo) (first dia-dispo) tempo)) dias-possiveis)]
       )
-      dias-com-dispos
+      (map (λ (dia)( filter (λ (intervalo) (intervalo-valido intervalo tempo)) (first (rest dia))) ) dias-com-dispos)
    )
 )
 
-(encontrar-dispo-semana-em-comum "00:20" (list dispo-semana-a dispo-semana-b dispo-semana-c))
+(encontrar-dispo-semana-em-comum "00:30" (list dispo-semana-a dispo-semana-b dispo-semana-c))
 
 ;;(foldr (λ (dispo result)(
  ;;                                 cond
@@ -333,7 +337,6 @@
 
 (define (intervalo-separado intervalo)(string-split intervalo "-"))
 
-(define (separa-horario horario)(string-split horario ":"))
 
 (define (separa-input input) (string-split input " "))
 
@@ -418,7 +421,7 @@
 (define lista-de-arquivos (recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input (read-line))))))
 
 ;(first(rest (first lista-de-arquivos)))
-(define segunda (map (λ (dia)(retorna-lista-do-dia "seg" dia)) (pessoas-com-o-dia "seg" lista-de-arquivos)))
+;;(define segunda (map (λ (dia)(retorna-lista-do-dia "seg" dia)) (pessoas-com-o-dia "seg" lista-de-arquivos)))
 ;(define terca   (map (λ (dia)(retorna-lista-do-dia "ter" dia)) (lista-com-pessoas-do-dia "ter" lista-de-arquivos)))
 ;(define quarta  (map (λ (dia)(retorna-lista-do-dia "qua" dia)) (lista-com-pessoas-do-dia "qua" lista-de-arquivos)))
 ;(define quinta  (map (λ (dia)(retorna-lista-do-dia "qui" dia)) (lista-com-pessoas-do-dia "qui" lista-de-arquivos)))
