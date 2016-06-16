@@ -9,60 +9,55 @@
          encontrar-dispo-semana-em-comum
          main)
 
-;estruturas
+;Estruturas 
 (struct horario (h m) #:transparent)
 (struct intervalo (inicio fim) #:transparent)
+
+;; Função que define um intervalo vazio sendo igual a void
 (define intervalo-vazio (void))
+
+;; Função que compara se um intervalo é vazio.
 (define (intervalo-vazio? inter) (equal? inter intervalo-vazio))
-;-------------------------------------------------------------
 
-;tratamento dos arquivos
-
-;-Funções split
-;Separa o intervalo no caracter '-'
+;; Separa a string do intervalo no caracter '-'
 (define (intervalo-separado intervalo)(string-split intervalo "-"))
 
-;o que faz?
-(define (separa-input input) (string-split input " "))
-
-;;Separa a string horário no caracter ':'
+;; Separa a string do horário no caracter ':'
 (define (separa-horario horario)(string-split horario ":"))
-;---------------------------------
 
-;-Funções de manipulação dos dados
-;;Constroi o horário apartir da string passada
-(define (string-para-horario string)
-  (horario
-   (string->number(first (separa-horario string)))
-   (string->number(first (rest (separa-horario string))))))
-
-;;concatena o caminho do arquivo ao nome do arquivo passado no parâmetro arq
-(define (arquivos-com-extensao list)
-  (cond
-    [(empty? list) list]
-    [else (cons (string-append "../testes/" (first list))  (arquivos-com-extensao (rest list)))]))
-
-;;o que ela faz????????
-(define (insere lst x)
-  (cond
-    [(empty? lst)(list x)]
-    [else (cons (first lst)(insere (rest lst) x))]))
-
-;; Retorna a lista formatada com horários e seu respectivo dia.
+;; Constrói uma lista com o dia da semana e a lista de intervalos
 (define (lista-de-intervalos-com-dia lista dia)(cons dia lista))
 
-;; Transforma '( '((horario "08" "30") (horario "10" "30")) '((horario "14" "03") (horario "16" "00")) '((horario "17" "10") (horario "18" "10")))
-;; em '((intervalo (horario "08" "30") (horario "10" "30")) (intervalo (horario "14" "03") (horario "16" "00")) (intervalo (horario "17" "10") (horario "18" "10")))
-(define (lista-de-intervalos list)
- (cond
-   [(empty? list) list]
-   [else (cons (intervalo (first (first list)) (first (rest (first list)))) (lista-de-intervalos (rest list)) )]))
+;;Constrói uma estrutura de horário a partir de uma string no formato 'xx:xx'
+(define (string->horario string)
+  (let* 
+    (
+        [string-horario-separado (separa-horario string)]
+        [hora (string->number(first string-horario-separado))]
+        [minuto (string->number(first (rest string-horario-separado))) ]
+    )
+    ( horario hora minuto )
+  )
+)
 
-;O q faz?
-(define (lista-de-horarios list)
+;; Insere um valor como último elemento da lista 
+(define (insere lst valor-para-inserir)
   (cond
-    [(empty? list) list]
-    [else (cons (string-para-horario (first list)) (lista-de-horarios (rest list)))]))
+    [(empty? lst)(list valor-para-inserir)]
+    [else (cons (first lst)(insere (rest lst) valor-para-inserir))])
+)
+
+;; Transforma uma lista de lista de horários em uma lista de intervalos
+(define (list-horarios->list-intervalos lst)
+ (cond
+   [(empty? lst) lst]
+   [else (cons (intervalo (first (first lst)) (first (rest (first lst)))) (list-horarios->list-intervalos (rest lst)) )]))
+
+;; Transforma uma lista de horários no formato de string para uma lista de horários no formato horário
+(define (lista-de-horarios lst)
+  (cond
+    [(empty? lst) lst]
+    [else (cons (string->horario (first lst)) (lista-de-horarios (rest lst)))]))
 
 ;O q faz?
 (define (lista-de-pre-intervalos list)
@@ -85,7 +80,7 @@
 ;; Retorna linha formatada.
 ;;qual a estrutura de retorno????????
 (define (formata-linha linha)
-  (lista-de-intervalos-com-dia( lista-de-intervalos ( lista-de-pre-intervalos-com-horario ( lista-de-pre-intervalos ( lista-sem-dia ( lista-com-dia linha))))) (first (lista-com-dia linha))))
+  (lista-de-intervalos-com-dia( list-horarios->list-intervalos ( lista-de-pre-intervalos-com-horario ( lista-de-pre-intervalos ( lista-sem-dia ( lista-com-dia linha))))) (first (lista-com-dia linha))))
 
 ;; Lê o arquivo inteiro e formata todas as entradas.
 (define (lista-com-todos-os-dias-formatados descritor lista)
@@ -278,7 +273,7 @@
 (define (main args)
   (let*
       (
-       [horario (string-para-horario (first args))]
+       [horario (string->horario (first args))]
        [dispos (recebe-lista-de-arquivos (rest args))]
        [dispos-formatados ( map (λ (dispo)( map (λ (dispo-dia) (cons (first dispo-dia) (list (rest dispo-dia))) ) dispo) )  dispos)]
        [dispos-separados (map (λ (val) ( string-append (first val) (foldl (λ (intervalo ac) (string-append (string-append ac " ") (intervalo->string intervalo) ) ) "" (first (rest val)) ) ) ) (encontrar-dispo-semana-em-comum horario dispos-formatados))]
@@ -290,3 +285,4 @@
     )
 )
 ;; (main (list "00:01" "../testes/a" "../testes/b"))
+;; (main (list "01:30" "../testes/b" "../testes/a" "../testes/livre"))
