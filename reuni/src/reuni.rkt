@@ -261,25 +261,32 @@
 ;; semanal.
 
 (define (identidade args) args)
+(define (string-horario hora minuto) (string-append hora (string-append ":" minuto)))
+(define (zero-formatado-ou-valor valor) (if (equal? 0 valor) "00" (if (<= valor 9) (string-append "0" (number->string valor)) (number->string valor))) )
+
+(define (intervalo->string intervalo)
+  (let
+    ([hora-inicio (zero-formatado-ou-valor (horario-h (intervalo-inicio intervalo)))]
+     [minuto-inicio (zero-formatado-ou-valor (horario-m (intervalo-inicio intervalo)))]
+     [hora-fim (zero-formatado-ou-valor (horario-h (intervalo-fim intervalo)))]
+     [minuto-fim (zero-formatado-ou-valor (horario-m (intervalo-fim intervalo)))]
+     )
+    (string-append (string-horario hora-inicio minuto-inicio) (string-append "-" (string-horario hora-fim minuto-fim)))
+  )
+)
+
 (define (main args)
   (let*
       (
        [horario (string-para-horario (first args))]
        [dispos (recebe-lista-de-arquivos (rest args))]
        [dispos-formatados ( map (λ (dispo)( map (λ (dispo-dia) (cons (first dispo-dia) (list (rest dispo-dia))) ) dispo) )  dispos)]
+       [dispos-separados (map (λ (val) ( string-append (first val) (foldl (λ (intervalo ac) (string-append (string-append ac " ") (intervalo->string intervalo) ) ) "" (first (rest val)) ) ) ) (encontrar-dispo-semana-em-comum horario dispos-formatados))]
        )
     
     (
-     ;;encontrar-dispo-semana-em-comum horario dispos-formatados
-
-     map (λ (val) ( string-append (first val) (foldl (λ (intervalo ac) (string-append (string-append ac " ") intervalo) ) "" (rest val) ) )) (encontrar-dispo-semana-em-comum horario dispos-formatados)
-
-     
-
- 
+     printf (foldr (λ (dispo-dia accumulator) (string-join (list dispo-dia accumulator) "~%")) "" dispos-separados)
      )
     )
 )
 ;; (main (list "00:01" "../testes/a" "../testes/b"))
-
-;; [duração] '(arquivos) 
