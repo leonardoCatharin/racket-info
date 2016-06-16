@@ -25,7 +25,7 @@
 ;; Separa a string do horário no caracter ':'
 (define (separa-horario horario)(string-split horario ":"))
 
-;; Constrói uma lista com o dia da semana e a lista de intervalos
+;; Constrói umintervaloa lista com o dia da semana e a lista de intervalos
 (define (lista-de-intervalos-com-dia lista dia)(cons dia lista))
 
 ;;Constrói uma estrutura de horário a partir de uma string no formato 'xx:xx'
@@ -163,27 +163,35 @@
   )
 )
 
+;;Função que retorna o módulo de um número. Usado na subtração de minutos
+(define (modulo x)
+  (cond
+    [(negative? x) (* x -1)]
+    [else x]
+  )
+)
+
+;;Retorna o horário total em minutos de um horário 00:00
+(define (tempo-total-horario horario)
+  (+ (* (horario-h horario) 60) (horario-m horario))
+)
+
 ;;verifica se no intervalo disposto pode ser feito a reunião.
 ;;se o tempo do intervalo é maior que o tempo da reunião retorne o intervalo.
 (define (intervalo-valido? intervalo tempo)
-  (let ([hora-fim-intervalo (horario-h (intervalo-fim intervalo))]
-        [minuto-fim-intervalo (horario-m(intervalo-fim intervalo))]
-        [hora-inicio-intervalo (horario-h(intervalo-inicio intervalo))]
-        [minuto-inicio-intervalo (horario-m(intervalo-inicio intervalo))]
-        [hora-tempo (horario-h tempo)]
-        [minuto-tempo (horario-m tempo)]
+  (let* ([tempo-total-intervalo-fim (tempo-total-horario(intervalo-fim intervalo))]
+         [tempo-total-intervalo-inicio (tempo-total-horario(intervalo-inicio intervalo))]
+         [tempo-total-intervalo (modulo (- tempo-total-intervalo-fim tempo-total-intervalo-inicio))]
+         [tempo-total-reuniao (tempo-total-horario tempo)]
        )
    (cond
-      [(positive? (- (- hora-fim-intervalo hora-inicio-intervalo) hora-tempo )) #t ]
-      [(zero? (- (- hora-fim-intervalo hora-inicio-intervalo) hora-tempo ))
-       (cond
-        [(positive? (- (- minuto-fim-intervalo minuto-inicio-intervalo) minuto-tempo) ) #t ]
-        [(zero? (- (- minuto-fim-intervalo minuto-inicio-intervalo) minuto-tempo) ) #t ]
-        [else #f]
-       )
-      ]
+      [(positive? (- tempo-total-intervalo tempo-total-reuniao)) #t]
+      [(equal? tempo-total-intervalo tempo-total-reuniao) #t ]
       [else #f]
    )))
+
+
+;(intervalo-valido? (intervalo (horario 01 01) (horario 02 00)) (horario 01 00))
 
 ;;'aplaina' as listas para a penas uma lista de intervalos
 ;;função vista em sala
