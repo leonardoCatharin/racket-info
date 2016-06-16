@@ -270,7 +270,13 @@
        )
     
     (
-     encontrar-dispo-semana-em-comum horario dispos-formatados
+     ;;encontrar-dispo-semana-em-comum horario dispos-formatados
+
+     map (λ (val) ( string-append (first val) (foldl (λ (intervalo ac) (string-append (string-append ac " ") intervalo) ) "" (rest val) ) )) (encontrar-dispo-semana-em-comum horario dispos-formatados)
+
+     
+
+ 
      )
     )
 )
