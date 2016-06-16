@@ -3,6 +3,8 @@
 (provide horario
          intervalo
          intervalo-intersecao
+         intervalo-vazio		
+         intervalo-vazio?
          encontrar-dispo-em-comum
          encontrar-dispo-semana-em-comum
          main)
@@ -10,6 +12,8 @@
 ;estruturas
 (struct horario (h m) #:transparent)
 (struct intervalo (inicio fim) #:transparent)
+(define intervalo-vazio (void))
+(define (intervalo-vazio? inter) (equal? inter intervalo-vazio))
 ;-------------------------------------------------------------
 
 ;tratamento dos arquivos
@@ -249,30 +253,27 @@
         ) dias-com-dispos) 
      )))
 
-(define (remove-dias-com-menos-pessoas numero lista) (filter (λ (dia)(equal? numero (length dia))) lista ))
-
-(define lista-de-arquivos (recebe-lista-de-arquivos (arquivos-com-extensao (rest (separa-input (read-line))))))
-
 ;--------------------------------------------------------------------------
 
-;; list string -> void
-;; Esta é a função principal. Esta função é chamada a partir do arquivo
-;; reuni-main.rkt
-;;
-;; args é a lista de parâmetros para o programa.
-;;
-;; O primeiro parâmetro é o tempo mínimo (string) que os intervalos em comum
-;; devem ter. O tempo mínimo é especificado usando a formatação de horário.
-;;
-;; O restante dos parâmetros são nomes de arquivos. Cada arquivo de entrada
-;; contêm uma disponibilidade semanal. Veja exemplos de arquivos no diretórios
-;; testes.
-;;
+
 ;; A saída desta função é a escrita na tela dos intervalos em comum que
 ;; foram encontrados. O formato da saída deve ser o mesmo da disponibilidade
 ;; semanal.
+
+(define (identidade args) args)
 (define (main args)
-  (error "Não implementado"))
-;; Atribui para in o arquivo
+  (let*
+      (
+       [horario (string-para-horario (first args))]
+       [dispos (recebe-lista-de-arquivos (rest args))]
+       [dispos-formatados ( map (λ (dispo)( map (λ (dispo-dia) (cons (first dispo-dia) (list (rest dispo-dia))) ) dispo) )  dispos)]
+       )
+    
+    (
+     encontrar-dispo-semana-em-comum horario dispos-formatados
+     )
+    )
+)
+;; (main (list "00:01" "../testes/a" "../testes/b"))
 
 ;; [duração] '(arquivos) 
